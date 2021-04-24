@@ -1,6 +1,10 @@
 import math
 import re
 
+from PIL import Image, ImageDraw, ImageFont
+
+import logic
+
 BEASTS_PER_PAGE = 6
 EMOJI_DISPLAY = \
     ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
@@ -80,13 +84,14 @@ async def display_monsters(channel, beasts, page: int, max_page: int, **kwargs):
     # this option is here if you want to add text after or before
     prepend = kwargs.setdefault("prepend", "")
     append = kwargs.setdefault("append", "")
+    file = kwargs.setdefault("file", None)
 
     output = ""
     output += "Page " + str(page) + "\n"
     for count, beast in enumerate(beasts):
         output += EMOJI_DISPLAY[count] + " " + str(beast) + "\n \n"
     output = prepend + output + append
-    output_message = await channel.send(output)
+    output_message = await channel.send(output, file=file)
 
     # adding the emjois so users can get to the other pages easily
     if page > 1:
@@ -99,3 +104,44 @@ async def display_monsters(channel, beasts, page: int, max_page: int, **kwargs):
         await output_message.add_reaction(EMOJI_DISPLAY[j])
 
     return output_message
+
+#this takes a monster object and makes an image out of it
+def monster_to_image(monster: logic.Monster):
+    #gets the images and making sure its RGBA so the paste function works correctly
+    im = Image.open("assets/monster_background.png").convert("RGBA")
+    im2 = Image.open("assets/orc.png").convert("RGBA")
+
+    # adding the picture of a monster
+    im.paste(im2, (0, 0), im2)
+
+    # showing the stats
+    draw = ImageDraw.Draw(im)
+    font = ImageFont.truetype("Calibri.ttf", size=32)
+    draw.text((144, 266), f"POWER: {monster.get_power()}", fill=(0, 0, 0), font=font, anchor="mt")
+
+    # we want the the individual stats to be shown smaller
+    font = ImageFont.truetype("Calibri.ttf", size=24)
+    draw.text((39, 291), f"attack: {monster.attack}", fill=(0, 0, 0), font=font)
+    draw.text((39, 315), f"defense: {monster.defense}", fill=(0, 0, 0), font=font)
+    draw.text((39, 339), f"stealth: {monster.stealth}", fill=(0, 0, 0), font=font)
+    draw.text((39, 363), f"speed: {monster.speed}", fill=(0, 0, 0), font=font)
+
+    return im
+
+# this takes a list of beasts and shows them all at once in one image
+def show_monsters_visual(beasts):
+    im = Image.new("RGBA", ((288 + 6) * 3, (416 + 6) * 2))
+    x = 0
+    y = 0
+    for beast in beasts:
+        monster_image = monster_to_image(beast)
+        im.paste(monster_image, (x * (288 + 6), y * (416 + 6)), monster_image)
+
+        x += 1
+        if x >= 3:
+            x = 0
+            y += 1
+            if y >= 2:
+                break
+
+    return im

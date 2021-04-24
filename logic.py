@@ -52,33 +52,34 @@ class Player:
         return player
 
 class Monster:
-    def __init__(self, stat1, stat2, stat3, stat4, monster_id: int, alive: bool,owner=None):
-        self.stat1 = stat1
-        self.stat2 = stat2
-        self.stat3 = stat3
-        self.stat4 = stat4
+    def __init__(self, attack, defense, stealth, speed, monster_id: int, alive: bool, owner=None):
+        self.attack = attack
+        self.defense = defense
+        self.stealth = stealth
+        self.speed = speed
         self.alive = alive
         self.owner = owner
         self.monster_id = monster_id
 
     def __str__(self):
-        output = f"Stat1: {self.stat1} Stat2: {self.stat2} Stat3: {self.stat3} Start4: {self.stat4} POWER: {self.get_power()}"
+        output = f"attack: {self.attack} defense: {self.defense} stealth:" \
+                 f"{self.stealth} speed: {self.speed} POWER: {self.get_power()}"
         return output
 
     def get_power(self):
-        return self.stat1 + self.stat2 + self.stat3 + self.stat4
+        return self.attack + self.defense + self.stealth + self.speed
 
     def get_stat1(self):
-        return self.stat1
+        return self.attack
 
     def get_stat2(self):
-        return self.stat2
+        return self.defense
 
     def get_stat3(self):
-        return self.stat3
+        return self.stealth
 
     def get_stat4(self):
-        return self.stat4
+        return self.speed
 
     def get_tier(self):
         if self.get_power() < 1000:
@@ -99,10 +100,10 @@ class Monster:
 
     def eat(self, other_monster):
         #if other_monster.alive:
-        self.stat1 += other_monster.get_stat1()
-        self.stat2 += other_monster.get_stat2()
-        self.stat3 += other_monster.get_stat3()
-        self.stat4 += other_monster.get_stat4()
+        self.attack += other_monster.get_stat1()
+        self.defense += other_monster.get_stat2()
+        self.stealth += other_monster.get_stat3()
+        self.speed += other_monster.get_stat4()
         other_monster.alive = False
 
     def get_id(self):
@@ -117,7 +118,7 @@ class Monster:
         stat4 = random.randint(10, 100)
 
         # adding the moster to the data base
-        command = "INSERT INTO beasts (owner_id, stat1, stat2, stat3, stat4) VALUES({},{},{},{},{})"
+        command = "INSERT INTO beasts (owner_id, attack, defense, stealth, speed) VALUES({},{},{},{},{})"
         cursor.execute(command.format("0", stat1, stat2, stat3, stat4))
         database_connection.commit()
 
@@ -174,11 +175,13 @@ class Monster:
         challgeners_beast.save()
 
         return (winner, action_done)
+
     # this saves the monster to the data base
     def save(self):
         owner_id = self.owner.get_id() if self.owner is not None else "0"
         alive = 1 if self.alive else 0
 
-        command = "UPDATE beasts SET stat1 = {}, stat2 = {}, stat3 = {}, stat4 = {}, owner_id = {}, alive = {} WHERE id = {}"
-        cursor.execute(command.format(self.stat1, self.stat2, self.stat3, self.stat4, owner_id, alive, self.monster_id))
+        command = "UPDATE beasts SET attack = {}, defense = {}, stealth = {}, speed = {}, owner_id = {}, alive = {} " \
+                  "WHERE id = {}"
+        cursor.execute(command.format(self.attack, self.defense, self.stealth, self.speed, owner_id, alive, self.monster_id))
         database_connection.commit()

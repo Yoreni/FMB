@@ -1,7 +1,9 @@
+import discord
+
 from logic import Player
 from requests import Query, BattleRequest
-from utils import get_beasts_by_power, calc_max_page, validate_int, splice_monsters, display_monsters, \
-    get_beasts_by_comparison, get_user
+from utils import *
+from PIL import Image
 
 
 # args in format !fmb profile <user> (page)
@@ -30,7 +32,11 @@ async def print_users_monsters(bot, args, channel):
         page = int(args[3]) if validate_int(args[3], min=1, max=max_page) else 1
     beasts = splice_monsters(beasts, page)
 
-    output_message = await display_monsters(channel, beasts, page, max_page)
+    monster_image = show_monsters_visual(beasts)
+    monster_image.save("output.png")
+    with open("output.png", "rb") as f:
+        image_file = discord.File(f)
+    output_message = await display_monsters(channel, beasts, page, max_page, file=image_file)
 
     # editing the users command so we save code if the user wants to switch pages by reacting
     if len(args) <= 3:

@@ -4,6 +4,7 @@ import json
 import re
 import math
 import sqlite3
+from PIL import Image
 
 from logic import Player, Monster
 from utils import *
@@ -178,12 +179,24 @@ class MyClient(discord.Client):
                         beasts = get_beasts_by_power(player)
                         oponent_beast = beasts[((page - 1) * 6) + EMOJI_DISPLAY.index(str(reaction))]
 
-                        challenger = Player.load(str(user.id))
+                        # we just want it to show an image of the monster
 
-                        q = BattleRequest(args, None, oponent_beast, challenger)
-                        q.command[3] = "1" # this is so it always shows the first page first
-                        q = await print_choose_monsters(self, q, reaction.message.channel)
-                        self.queries.append(q)
+                        monster_image = monster_to_image(oponent_beast)
+                        monster_image.save("output.png")
+                        with open("output.png", "rb") as f:
+                            image_file = discord.File(f)
+
+                        profile_user = await self.fetch_user(int(oponent_beast.owner._id))
+
+                        output_message = await reaction.message.channel.send(profile_user.name, file=image_file)
+                        #output_message.
+                        # code to start a battle
+                        #challenger = Player.load(str(user.id))
+
+                        #q = BattleRequest(args, None, oponent_beast, challenger)
+                        #q.command[3] = "1" # this is so it always shows the first page first
+                        #q = await print_choose_monsters(self, q, reaction.message.channel)
+                        #self.queries.append(q)
 
 # this inits the bot
 def init_bot():
