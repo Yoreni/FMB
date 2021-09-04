@@ -13,3 +13,5 @@ its commands are
 also there might be a few bugs with it as you can fight your own beasts/monsters and i should fix that
 
 also ik it does not have everything in the real fmm game it just has the core features
+ 
+this bot is written with discord.py and that has been discontinued. maybe one day i will come back to this but i will have to start from scratch
